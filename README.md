@@ -1,107 +1,145 @@
 # Distribuidora BV - Sistema de Gestión
 
-Backend para el sistema de gestión integral de una distribuidora. Construido con NestJS, TypeScript y MySQL, siguiendo una arquitectura modular con patrones de diseño orientados al dominio.
+Sistema de gestión integral para una distribuidora, desarrollado con **NestJS** (backend) y **React + Vite** (frontend).
 
+## Actividad 4.1 - Despliegue del sistema
+
+En esta actividad se realizó la configuración y el despliegue del sistema para poder utilizarlo desde internet.
+
+Los pasos realizados fueron:
+
+- Clonar repositorio
+- Configurar entorno
+- Ejecutar el sistema
+- Desplegar en hosting (Vercel + Railway)
 ---
 
 ## Stack tecnológico
 
-- **Framework**: NestJS 11.x
-- **Lenguaje**: TypeScript 5.7
-- **Base de datos**: MySQL 8.0 + TypeORM 0.3.22
-- **Autenticación**: JWT + bcrypt
-- **Documentación API**: Swagger / OpenAPI
-- **Procesamiento de archivos**: Multer, Sharp, Tesseract.js (OCR), XLSX
-- **Generación de PDFs**: PDFKit, PDFMake
-- **Email**: Nodemailer
-- **Testing**: Jest + ts-jest
-- **Linting/Formato**: ESLint + Prettier
-- **Infraestructura**: Docker + Docker Compose
-- **Analytics**: Metabase
-
----
-
-## Estructura del proyecto
-
-```
-distribuidora-bv/
-├── src/
-│   ├── main.ts                        # Bootstrap de la aplicación
-│   ├── app.module.ts                  # Módulo raíz
-│   ├── index.ts                       # Exportación central de entidades
-│   ├── migrations/                    # Migraciones de base de datos
-│   └── modules/
-│       ├── gestion-usuario/           # Usuarios, autenticación, roles
-│       ├── gestion-productos/         # Catálogo, stock, precios
-│       ├── gestion-documentos/        # Facturas, pedidos, remitos, notas
-│       ├── gestion-cobros-pagos/      # Cobros, pagos, cajas, cheques, tarjetas
-│       ├── gestion-cuenta/            # Cuentas corrientes de clientes
-│       ├── gestion-bancos/            # Bancos, movimientos, documentos bancarios
-│       ├── gestion-sistema/           # Configuración, notificaciones, auditoría
-│       ├── gestion-despacho/          # Despacho y logística
-│       ├── organizacion/              # Clientes, proveedores, personal, zonas
-│       ├── afip/                      # Integración AFIP (WSAA, WSFE)
-│       ├── impresion/                 # Generación de reportes e impresión
-│       ├── gutil/                     # Utilidades: provincias, localidades, IVA
-│       └── common/                    # Filtros, pipes, decoradores, seeds
-├── test/                              # Tests E2E
-├── uploads/                           # Archivos subidos
-├── tessdata/                          # Datos de entrenamiento OCR
-├── assets/                            # Recursos estáticos
-├── fuentes/                           # Fuentes tipográficas
-├── orm.config.ts                      # Configuración DataSource TypeORM
-├── docker-compose.yml                 # Servicios Docker
-├── Dockerfile                         # Build multi-stage
-├── .env                               # Variables de entorno
-└── tsconfig.json                      # Configuración TypeScript
-```
-
-### Estructura interna de cada módulo
-
-Cada módulo sigue la misma convención:
-
-```
-modulo/
-├── domain/
-│   └── entities/        # Entidades TypeORM
-├── application/         # Servicios y casos de uso
-├── infraestructure/     # Repositorios y acceso a datos
-├── dto/                 # Data Transfer Objects
-└── *.module.ts          # Definición del módulo NestJS
-```
-
----
-
-## Módulos principales
-
-| Módulo | Descripción |
+| Capa | Tecnología |
 |---|---|
-| `gestion-usuario` | Usuarios, autenticación JWT, roles y permisos |
-| `gestion-productos` | Marcas, líneas, productos, stock, historial de precios |
-| `gestion-documentos` | Facturas de venta/compra, pedidos, remitos, notas de crédito/débito |
-| `gestion-cobros-pagos` | Cajas, cobros, pagos, cheques, tarjetas de crédito |
-| `gestion-cuenta` | Cuentas corrientes, detalles, saldos impagos |
-| `gestion-bancos` | Bancos, familias de banco, movimientos bancarios |
-| `gestion-sistema` | Configuración del sistema, auditoría, notificaciones |
-| `gestion-despacho` | Gestión de despacho y entregas |
-| `organizacion` | Clientes, proveedores, personal, puntos de venta, zonas |
-| `afip` | Integración con AFIP: WSAA, WSFE, parámetros fiscales |
-| `impresion` | Generación de PDFs y reportes imprimibles |
-| `gutil` | Provincias, localidades, condiciones de IVA, domicilios |
-| `common` | Seeds, filtros globales, pipes, decoradores, excepciones |
+| Backend | NestJS 11, TypeScript 5.7 |
+| Base de datos | MySQL 8.0 + TypeORM 0.3.22 |
+| Autenticación | JWT + bcrypt + Google OAuth |
+| Frontend | React 19, Vite 6, Tailwind CSS |
+| Contenedores | Docker + Docker Compose |
+| Hosting | Railway (backend), Vercel (frontend) |
 
 ---
 
-## Configuración
+## 1. Repositorios de GitHub
 
-### Variables de entorno (`.env`)
+Los proyectos están divididos en dos repositorios de GitHub: uno para el frontend y otro para el backend. Esto permite trabajar y desplegar cada parte del sistema de forma independiente.
+
+```bash
+# Backend
+git clone https://github.com/Crapst22/Prog-Avanzada-Back.git
+
+# Frontend
+git clone https://github.com/Crapst22/Prog-Avanzada-Front.git
+```
+---
+
+## 2. Configuración de la base de datos
+
+Para el desarrollo local se utiliza **Docker** para levantar una instancia de MySQL 8.0, junto con phpMyAdmin para la gestión visual de la base de datos.
+
+```bash
+cd Prog-Avanzada-Back
+docker-compose up -d
+```
+
+| Servicio | URL |
+|---|---|
+| MySQL | `localhost:3310` |
+| phpMyAdmin | http://localhost:8081 |
+
+Una vez levantada la base de datos, se crean las tablas y se cargan los datos iniciales (seeds) ejecutando el endpoint:
+
+```text
+GET http://localhost:3000/api/seed-all/execute
+```
+
+Los seeds se ejecutan en orden y crean:
+
+1. **Roles y usuarios** — Roles del sistema (Administrador, Vendedor, Repositor, etc.) y un usuario admin por defecto (`admin@gmail.com` / `admin`).
+2. **Organización** — Provincias, localidades, condiciones de IVA, empresas, clientes, proveedores y personal.
+3. **Familia de productos** — Líneas (Aceites, Azúcar, Chocolates, etc.) y marcas (SIN MARCA, CAROYENSE, CIRCE).
+
+Los seeds son idempotentes: verifican si los datos ya existen antes de insertarlos.
+
+> **Nota:** La propiedad `synchronize: true` está habilitada en el backend para sincronizar automáticamente las entidades con la base de datos. Para un entorno productivo, lo recomendable es trabajar mediante migraciones.
+
+---
+
+## 3. Configuración del Backend en Railway
+
+Una vez preparada la base de datos, se utilizó **Railway** para desplegar el backend.
+
+Pasos realizados:
+
+1. Se conectó Railway con el repositorio de GitHub del backend.
+2. Se configuraron las variables de entorno necesarias para la conexión con la base de datos y el funcionamiento del servidor.
+3. Railway detecta automáticamente la configuración del proyecto:
+   - `railway.json`: builder **NIXPACKS**, comando de inicio `yarn start:migrate` (ejecuta migraciones y luego arranca la app), healthcheck en `/api`.
+   - `nixpacks.toml`: define Node.js 20 + Yarn.
+4. Railway genera un dominio automático, por ejemplo: `https://tu-proyecto.up.railway.app`.
+
+Las variables de entorno configuradas incluyen la conexión a la base de datos, el JWT, la expiración de tokens y el Client ID de Google.
+
+> Los valores reales de las variables de entorno no se incluyen en el repositorio, ya que contienen información sensible.
+
+---
+
+## 4. Configuración de autenticación con Google
+
+Para permitir que los usuarios se autentiquen con una cuenta de Google, se configuró **Google Cloud**:
+
+1. Se creó un proyecto dentro de Google Cloud.
+2. Se configuraron las credenciales de Google OAuth.
+3. Se agregó el dominio correspondiente al proyecto.
+4. Se obtuvo el `GOOGLE_CLIENT_ID` y se agregó como variable de entorno en Railway.
+
+```env
+GOOGLE_CLIENT_ID=<ID-proporcionado-por-Google>
+```
+
+De esta manera, el backend desplegado en Railway puede utilizar el Client ID para autenticar usuarios mediante Google.
+
+---
+
+## 5. Configuración del Frontend en Vercel
+
+Para desplegar el frontend se utilizó **Vercel**:
+
+1. Se conectó Vercel con el repositorio de GitHub del frontend.
+2. Se configuró el proyecto:
+   - Framework Preset: **Vite**
+   - Build command: `yarn build`
+   - Output directory: `dist`
+3. El archivo `vercel.json` incluye rewrites para que React Router funcione correctamente (toda ruta cae en `index.html`).
+4. Se agregó la variable de entorno `VITE_API_URL` con la URL real del backend en Railway.
+5. Vercel genera un dominio automático, por ejemplo: `https://tu-proyecto.vercel.app`.
+
+| Servicio | URL |
+|---|---|
+| Frontend (Vercel) | `https://<front>.vercel.app` |
+| Backend / API (Railway) | `https://<back>.up.railway.app/api` |
+
+---
+
+## 6. Variables de entorno
+
+Las variables de entorno son necesarias para conectar las diferentes partes del proyecto y evitar colocar información sensible directamente dentro del código.
+
+### Backend
 
 ```env
 DB_HOST=localhost
-DB_PORT=3306
+DB_PORT=3310
 DB_USERNAME=admin
 DB_PASSWORD=admin
-DB_DATABASE=distribuidora
+DB_DATABASE=proyecto
 
 PORT=3000
 DB_TYPE=mysql
@@ -112,75 +150,164 @@ PUNTO_VENTA_ACTIVO_ID=2
 GOOGLE_CLIENT_ID=<google_client_id>
 ```
 
+En el backend se configuraron las variables relacionadas con:
+
+- Conexión con la base de datos.
+- Configuración del servidor.
+- Autenticación JWT.
+- Google OAuth.
+
+### Frontend
+
+- `.env.development` → `VITE_API_URL="http://localhost:3000/api"`
+- `.env.production` → `VITE_API_URL="https://<backend>.up.railway.app/api"`
+
+> **Importante:** Los valores reales de estas variables no deben subirse a GitHub. En `.env.production` la URL del backend debe apuntar al dominio real de Railway.
+
 ---
 
-## Instalación y ejecución
+## 7. Ejecución del proyecto
 
-### Con Docker (recomendado)
+### Requisitos previos
 
-Levanta MySQL, phpMyAdmin y Metabase:
+- Node.js 20 o superior
+- Yarn (`npm install -g yarn`)
+- Docker y Docker Compose (para la base de datos local)
+- Git
 
-```bash
-docker-compose up -d
-```
-
-| Servicio | URL |
-|---|---|
-| API | http://localhost:3000 |
-| phpMyAdmin | http://localhost:8081 |
-| Metabase | http://localhost:3002 |
-| MySQL | localhost:3310 |
-
-### Local
+### Backend
 
 ```bash
-# Instalar dependencias
+cd Prog-Avanzada-Back
 yarn install
-
-# Desarrollo con hot-reload
-yarn start:dev
-
-# Producción
-yarn build
-yarn start:prod
+yarn migration:run   # Ejecuta las migraciones de base de datos
+yarn start:dev       # Inicia con hot-reload
 ```
 
----
+La API queda disponible en **http://localhost:3000** y su documentación Swagger en **http://localhost:3000/api**.
 
-## Scripts disponibles
+### Frontend
 
 ```bash
-yarn start              # Iniciar en modo normal
-yarn start:dev          # Iniciar con watch mode
-yarn build              # Compilar TypeScript
-yarn lint               # Corregir errores de linting
-yarn test               # Ejecutar tests unitarios
-yarn test:e2e           # Ejecutar tests E2E
-yarn test:cov           # Cobertura de tests
-yarn migration:generate # Generar migración
-yarn migration:run      # Ejecutar migraciones
-yarn migration:revert   # Revertir última migración
+cd Prog-Avanzada-Front
+yarn install
+yarn dev
+```
+
+La aplicación queda disponible en **http://localhost:5173**.
+
+---
+
+## 8. Pruebas básicas
+
+### Backend
+
+1. Verificar que la API responde: `GET http://localhost:3000/api` → debe devolver `200 OK`.
+2. Acceder a Swagger y probar un endpoint de autenticación: `POST /api/auth/login`.
+3. Probar un CRUD básico (ej. listar clientes o productos) y confirmar que devuelve datos de la base de datos.
+
+### Frontend
+
+1. Abrir la URL del frontend y validar que carga correctamente.
+2. Iniciar sesión con credenciales del sistema.
+3. Navegar por los módulos principales (clientes, productos, facturas) y verificar que la información se carga desde la API.
+4. Probar crear/editar un registro y confirmar que persiste al recargar la página.
+
+### Consideraciones
+
+- Usar navegadores actualizados y `Ctrl+Shift+R` (recarga forzada) si hay cambios de assets.
+- Si se modifica el backend, Railway redepliega automáticamente con cada push a GitHub.
+
+---
+
+## 9. Despliegue automático
+
+Al conectar los repositorios con GitHub, tanto Railway como Vercel detectan los nuevos cambios y reinician el proceso de despliegue automáticamente.
+
+Cuando se hacen cambios y se ejecuta `push` al repositorio:
+
+- **Railway** vuelve a compilar y desplegar el backend.
+- **Vercel** vuelve a generar el build y publicar el frontend.
+
+Esto facilita el mantenimiento del proyecto porque no es necesario realizar manualmente el proceso de despliegue cada vez que se actualiza el código.
+
+---
+
+## 10. Scripts utilizados
+
+### Backend
+
+```bash
+yarn install              # Instalar dependencias
+yarn start                # Iniciar en modo normal
+yarn start:dev            # Iniciar con hot-reload
+yarn build                # Compilar TypeScript
+yarn start:prod           # Ejecutar la compilación
+yarn lint                 # Lint y formato
+```
+
+### Frontend
+
+```bash
+yarn install              # Instalar dependencias
+yarn build                # Build de producción
+yarn preview              # Previsualizar el build
+yarn lint                 # Lint
 ```
 
 ---
 
-## Documentación API
+## 11. Servicios utilizados
 
-Una vez levantada la aplicación, la documentación Swagger está disponible en:
-
-```
-http://localhost:3000/api
-```
-
-Todos los endpoints tienen el prefijo `/api`.
+| Servicio | Uso dentro del proyecto |
+|---|---|
+| GitHub | Guardar el código y controlar las versiones |
+| Docker | Base de datos local (MySQL + phpMyAdmin) |
+| Railway | Alojar y ejecutar el backend |
+| Vercel | Alojar y ejecutar el frontend |
+| Google Cloud | Configurar la autenticación con Google |
 
 ---
 
-## Convenciones de código
+## 12. Estructura del proyecto
 
-- **Módulos y archivos**: kebab-case (`gestion-usuario`, `factura-venta.service.ts`)
-- **Clases y entidades**: PascalCase (`FacturaVenta`, `Usuario`)
-- **Tablas en BD**: snake_case (`factura_venta`, `tipo_movimiento_bancario`)
-- **DTOs**: validados con `class-validator`, con whitelist estricto
-- **Excepciones**: manejadas por filtro global (`GlobalExceptionFilter`)
-- **Body limit**: 50MB para JSON y URL-encoded
+```
+Proyecto1_Back/
+├── src/
+│   ├── main.ts                    # Bootstrap de la aplicación
+│   ├── app.module.ts              # Módulo raíz
+│   ├── index.ts                   # Exportación central de entidades
+│   ├── migrations/                # Migraciones de base de datos
+│   └── modules/
+│       ├── gestion-usuario/       # Usuarios, autenticación, roles
+│       ├── gestion-productos/     # Catálogo, stock, precios
+│       ├── gestion-documentos/    # Facturas, pedidos, remitos
+│       ├── gestion-sistema/       # Configuración, auditoría
+│       ├── organizacion/          # Clientes, proveedores, personal
+│       ├── gutil/                 # Provincias, localidades, IVA
+│       └── common/                # Filtros, pipes, decoradores, seeds
+├── docker-compose.yml             # MySQL + phpMyAdmin
+├── railway.json                   # Configuración de Railway
+├── orm.config.ts                  # Configuración TypeORM CLI
+└── .env                           # Variables de entorno
+
+Proyecto1_Front/
+├── src/                           # Código de la aplicación React
+├── .env.development               # Variables de desarrollo
+├── .env.production                # Variables de producción
+├── vercel.json                    # Rewrites para SPA
+└── vite.config.ts                 # Configuración de Vite
+```
+
+---
+
+## 13. Consideraciones
+
+- El frontend y el backend se encuentran en repositorios separados.
+- La base de datos se ejecuta localmente mediante Docker y en producción mediante el servicio de Railway.
+- El backend se encuentra desplegado en Railway.
+- El frontend se encuentra desplegado en Vercel.
+- La conexión entre el backend y la base de datos se realiza mediante variables de entorno.
+- La autenticación con Google utiliza un Client ID generado desde Google Cloud.
+- Las variables de entorno y credenciales no deben subirse al repositorio de GitHub.
+- `synchronize: true` fue utilizado durante la configuración inicial de la base de datos. Para producción se recomienda trabajar mediante migraciones.
